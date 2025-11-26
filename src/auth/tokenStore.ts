@@ -1,12 +1,35 @@
 // tokenStore.ts
-// 安全缓存 access/refresh token（占位实现）
+// 简单的内存 token 存储，支持 TTL（可替换为 Redis/Keyv）
 
-const store = new Map<string, any>();
+type TokenRecord = {
+  value: any;
+  expiresAt?: number | null;
+};
 
-export function saveToken(key: string, token: any) {
-  store.set(key, token);
+const store = new Map<string, TokenRecord>();
+
+export function saveToken(key: string, token: any, ttlSeconds?: number) {
+  const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : null;
+  store.set(key, { value: token, expiresAt });
 }
 
 export function getToken(key: string) {
-  return store.get(key) || null;
+  const rec = store.get(key);
+  if (!rec) return null;
+  if (rec.expiresAt && rec.expiresAt < Date.now()) {
+    store.delete(key);
+    return null;
+  }
+  return rec.value;
+}
+
+export function deleteToken(key: string) {
+  store.delete(key);
+}
+
+export function clearExpired() {
+  const now = Date.now();
+  for (const [k, v] of store.entries()) {
+    if (v.expiresAt && v.expiresAt < now) store.delete(k);
+  }
 }
