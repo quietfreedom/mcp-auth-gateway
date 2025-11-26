@@ -7,7 +7,7 @@ import {
   type JSONWebKeySet,
   type KeyLike
 } from "jose";
-import type { RawManifestPayload, ToolManifest } from "./types";
+import type { RawManifestPayload, ToolManifest } from "./type";
 
 /**
  * 验签所需的选项：
