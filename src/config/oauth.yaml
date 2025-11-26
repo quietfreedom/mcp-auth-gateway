@@ -1,0 +1,8 @@
+# oauth.yaml
+# IdP/客户端配置信息（占位示例）
+
+client:
+  id: your-client-id
+  secret: your-client-secret
+  issuer: https://example.com
+  redirect_uri: http://localhost:3000/callback

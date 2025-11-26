@@ -1,0 +1,7 @@
+# servers.yaml
+# 下游 MCP Server 列表 & manifest URL（占位示例）
+
+servers:
+  - id: github-mcp
+    name: GitHub MCP
+    manifest_url: https://example.com/github/manifest.json
