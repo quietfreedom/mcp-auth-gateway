@@ -1,10 +1,10 @@
 {
   "name": "mcp-auth-gateway",
   "version": "0.1.0",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
+    "start": "node dist/src/main.js",
     "start:demo": "node scripts/start-demo.js",
     "serve:web": "npx http-server web -p 3000 --cors",
     "test": "jest --runInBand",
