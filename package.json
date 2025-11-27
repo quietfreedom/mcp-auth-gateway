@@ -6,6 +6,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "start:demo": "node scripts/start-demo.js",
+    "serve:web": "npx http-server web -p 3000 --cors",
     "test": "jest --runInBand",
     "test:watch": "jest --watchAll",
     "lint": "eslint src --ext .ts",
