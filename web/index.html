@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MCP-Auth Gateway Demo UI</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Helvetica,Arial;background:#f7f9fc;padding:20px}
+    .box{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:12px}
+    label{display:block;margin:6px 0 2px}
+    input[type=text]{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
+    button{margin-top:8px;padding:8px 12px;border:none;background:#0b74de;color:#fff;border-radius:6px;cursor:pointer}
+    pre{background:#0f1720;color:#e6eef8;padding:12px;border-radius:6px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h2>MCP-Auth Gateway 演示</h2>
+
+  <div class="box">
+    <h3>OAuth 启动 / 回调（示例）</h3>
+    <label>Issuer</label>
+    <input id="issuer" value="https://issuer.example/" />
+    <label>Client ID</label>
+    <input id="clientId" value="client" />
+    <label>Redirect URI</label>
+    <input id="redirect" value="http://localhost:4002/auth/callback" />
+    <label>Server ID (session key)</label>
+    <input id="serverId" value="demo-srv" />
+    <label>Scopes (空格分隔)</label>
+    <input id="scopes" value="openid profile" />
+    <div style="margin-top:8px">
+      <button onclick="startOauth()">Start OAuth</button>
+      <button onclick="simulateCallback()">Simulate Callback</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>会话管理</h3>
+    <div>
+      <button onclick="listSessions()">List Sessions</button>
+      <input id="sessionFetchId" placeholder="session id for detail/revoke" style="width:60%;display:inline-block;margin-left:8px" />
+    </div>
+    <div style="margin-top:8px">
+      <button onclick="getSession()">Get Session</button>
+      <button onclick="revokeSession()" style="background:#e53935">Revoke Session</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>通用</h3>
+    <button onclick="health()">Health</button>
+  </div>
+
+  <div class="box">
+    <h3>响应 / 日志</h3>
+    <pre id="out">ready</pre>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

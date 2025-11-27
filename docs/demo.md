@@ -75,3 +75,36 @@ npm test
 - 移除临时的 `src/types/openid-client.d.ts` 并使用真实 `openid-client` 类型定义。
 
 如果你同意，我会把这个文档提交并推送到远程仓库。
+
+管理端点（演示/运维）
+--------------------------------
+
+本工程已在 `gatewayMcpServer` 中加入简单的管理端点，用于演示如何查看与撤销会话。生产环境请为这些端点添加认证与访问控制（例如 `ADMIN_TOKEN` 环境变量或基于 OAuth 的管理接口）。
+
+- `GET /admin/sessions` — 列出当前会话
+  ```bash
+  curl http://localhost:4002/admin/sessions
+  ```
+
+- `GET /admin/session/:id` — 获取单个会话详情
+  ```bash
+  curl http://localhost:4002/admin/session/<SESSION_ID>
+  ```
+
+- `POST /admin/revoke` — 撤销会话（请求 body: `{ "sessionId": "..." }`）
+  ```bash
+  curl -X POST http://localhost:4002/admin/revoke -H "Content-Type: application/json" -d '{"sessionId":"demo-srv"}'
+  ```
+
+示例（带简单管理令牌）
+如果你在生产/演示环境中希望限制管理操作，可以在调用时添加 `Authorization: Bearer <ADMIN_TOKEN>` 头（当前实现未强制校验，但建议改造为在服务端检查 `ADMIN_TOKEN`）：
+
+```bash
+curl -H "Authorization: Bearer ${ADMIN_TOKEN}" http://localhost:4002/admin/sessions
+```
+
+这些端点方便你在演示时展示：
+- 会话如何被创建（initialize → session 保存）
+- 如何查看会话中的 `grantedScopes` / `accessToken` 占位信息
+- 如何通过撤销动作立即使会话失效（演示 revoke 效果）
+
