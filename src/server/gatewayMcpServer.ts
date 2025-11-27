@@ -4,6 +4,7 @@
 import http from 'http';
 import { invokeToolThroughGateway } from '../flow/gatewayInvoker';
 import type { McpClientManager } from '../client/mcpClientManager';
+import { listSessions, revokeSession, getSession } from '../session/sessionStore';
 
 export interface GatewayServerOptions {
   port?: number;
@@ -16,6 +17,41 @@ export function startGatewayMcpServer(opts: GatewayServerOptions) {
 
   const srv = http.createServer(async (req, res) => {
     try {
+      // admin: list sessions
+      if (req.method === 'GET' && req.url === '/admin/sessions') {
+        const rows = listSessions();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ sessions: rows }));
+        return;
+      }
+
+      // admin: revoke session (POST body { sessionId })
+      if (req.method === 'POST' && req.url === '/admin/revoke') {
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) chunks.push(Buffer.from(chunk));
+        const raw = Buffer.concat(chunks).toString('utf8') || '{}';
+        const body = JSON.parse(raw);
+        const sid = body.sessionId;
+        if (!sid) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'missing sessionId' }));
+          return;
+        }
+        const ok = revokeSession(sid);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok }));
+        return;
+      }
+
+      // admin: get session detail
+      if (req.method === 'GET' && req.url && req.url.startsWith('/admin/session/')) {
+        const sid = req.url.split('/').pop() || '';
+        const rec = getSession(sid);
+        if (!rec) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'not found' })); return; }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ session: rec }));
+        return;
+      }
       if (req.method === 'POST' && req.url === '/invoke') {
         // 收集 body
         const chunks: Buffer[] = [];
