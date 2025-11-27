@@ -32,17 +32,19 @@ export class OauthClient {
   /**
    * 生成用于引导用户授权的 URL 与 state
    */
-  generateAuthorizationUrl(scopes: string[] = ['openid']) {
+  generateAuthorizationUrl(scopes: string[] = ['openid'], state?: string) {
     const codeVerifier = generators.codeVerifier();
     const codeChallenge = generators.codeChallenge(codeVerifier);
+    const theState = state ?? generators.state();
 
     const url = this.client.authorizationUrl({
       scope: scopes.join(' '),
       code_challenge: codeChallenge,
-      code_challenge_method: 'S256'
+      code_challenge_method: 'S256',
+      state: theState
     });
 
-    return { url, codeVerifier };
+    return { url, codeVerifier, state: theState };
   }
 
   /**
