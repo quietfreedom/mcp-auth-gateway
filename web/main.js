@@ -1,4 +1,5 @@
-const base = window.location.origin.replace(/:\d+$/, ':4002')
+const callbackBase = window.location.origin.replace(/:\d+$/, ':4002')
+const gatewayBase = window.location.origin.replace(/:\d+$/, ':4001')
 const out = document.getElementById('out')
 const sessionsArea = document.getElementById('sessionsArea')
 
@@ -13,9 +14,9 @@ async function startOauth(){
 
   const params = new URLSearchParams({ issuer, clientId, redirect, serverId, scopes })
   try{
-    const r = await fetch(base + '/auth/start?' + params.toString(), { method: 'GET', redirect: 'manual' })
-    const location = r.headers.get('location') || ''
-    log({ status: r.status, location })
+    const r = await fetch(callbackBase + '/auth/start?' + params.toString(), { method: 'GET', redirect: 'manual' })
+    const txt = await r.text()
+    try { const j = JSON.parse(txt); log(j); } catch (_) { log(txt) }
   }catch(e){ log('error: '+e.message) }
 }
 
@@ -23,9 +24,9 @@ async function simulateCallback(){
   const serverId = document.getElementById('serverId').value
   const params = new URLSearchParams({ state: 'demo-state', code: 'demo-code', serverId })
   try{
-    const r = await fetch(base + '/auth/callback?' + params.toString(), { method: 'GET' })
+    const r = await fetch(callbackBase + '/auth/callback?' + params.toString(), { method: 'GET' })
     const txt = await r.text()
-    log({ status: r.status, body: txt })
+    try { const j = JSON.parse(txt); log(j); } catch (_) { log(txt) }
   }catch(e){ log('error: '+e.message) }
 }
 
@@ -55,7 +56,7 @@ function renderSessions(list){
 
 async function listSessions(){
   try{
-    const r = await fetch(base + '/admin/sessions')
+    const r = await fetch(gatewayBase + '/admin/sessions')
     const j = await r.json()
     renderSessions(j)
     log({ sessions: j.length })
@@ -66,7 +67,7 @@ async function getSession(){
   const id = document.getElementById('sessionFetchId').value
   if(!id) return log('请提供 session id')
   try{
-    const r = await fetch(base + '/admin/session/' + encodeURIComponent(id))
+    const r = await fetch(gatewayBase + '/admin/session/' + encodeURIComponent(id))
     const j = await r.json()
     log(j)
   }catch(e){ log('error: '+e.message) }
@@ -76,7 +77,7 @@ async function revokeSession(){
   const id = document.getElementById('sessionFetchId').value
   if(!id) return log('请提供 session id')
   try{
-    const r = await fetch(base + '/admin/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id })})
+    const r = await fetch(gatewayBase + '/admin/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id })})
     const j = await r.json()
     log(j)
     listSessions()
@@ -85,7 +86,7 @@ async function revokeSession(){
 
 async function revokeSessionById(id){
   try{
-    const r = await fetch(base + '/admin/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id })})
+    const r = await fetch(gatewayBase + '/admin/revoke', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id })})
     const j = await r.json()
     log(j)
     listSessions()
@@ -94,16 +95,18 @@ async function revokeSessionById(id){
 
 async function health(){
   try{
-    const r = await fetch(base + '/health')
-    const t = await r.text()
-    log(t)
+    // check both demo callback and gateway
+    const r1 = await fetch(callbackBase + '/health')
+    const r2 = await fetch(gatewayBase + '/health')
+    const t1 = await r1.text(); const t2 = await r2.text()
+    log({ callback: t1, gateway: t2 })
   }catch(e){ log('error: '+e.message) }
 }
 
 async function invokeDemo(){
   try{
     const body = { serverId: document.getElementById('serverId').value || 'demo-srv', path: '/', method: 'GET' }
-    const r = await fetch('http://localhost:4001/invoke', { method: 'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(body) })
+    const r = await fetch(gatewayBase + '/invoke', { method: 'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(body) })
     const j = await r.json()
     log({ invoke: j })
   }catch(e){ log('invoke error: '+e.message) }
