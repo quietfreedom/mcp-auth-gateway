@@ -7,47 +7,76 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>MCP-Auth Gateway 演示</h2>
-
-  <div class="box">
-    <h3>OAuth 启动 / 回调（示例）</h3>
-    <label>Issuer</label>
-    <input id="issuer" value="https://issuer.example/" />
-    <label>Client ID</label>
-    <input id="clientId" value="client" />
-    <label>Redirect URI</label>
-    <input id="redirect" value="http://localhost:4002/auth/callback" />
-    <label>Server ID (session key)</label>
-    <input id="serverId" value="demo-srv" />
-    <label>Scopes (空格分隔)</label>
-    <input id="scopes" value="openid profile" />
-      <button onclick="startOauth()">Start OAuth</button>
-      <button onclick="simulateCallback()" class="secondary">Simulate Callback</button>
-      <button onclick="invokeDemo()" class="secondary">Invoke /invoke</button>
-      <button onclick="simulateCallback()">Simulate Callback</button>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="logo">MCP-Auth Gateway — Demo</div>
+        <div class="muted small">本地演示版 · 用于展示 OAuth / 会话 / 调用流程</div>
+      </div>
+      <div class="row">
+        <button onclick="health()" class="secondary">Health</button>
+      </div>
     </div>
-  </div>
 
-  <div class="box">
-    <h3>会话管理</h3>
-    <div>
-      <button onclick="listSessions()">List Sessions</button>
-      <input id="sessionFetchId" placeholder="session id for detail/revoke" style="width:60%;display:inline-block;margin-left:8px" />
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h3>OAuth 启动 / 回调</h3>
+          <div class="field">
+            <label>Issuer</label>
+            <input id="issuer" value="https://issuer.example/" />
+          </div>
+          <div class="field">
+            <label>Client ID</label>
+            <input id="clientId" value="client" />
+          </div>
+          <div class="field">
+            <label>Redirect URI</label>
+            <input id="redirect" value="http://localhost:4002/auth/callback" />
+          </div>
+          <div class="field">
+            <label>Server ID (session key)</label>
+            <input id="serverId" value="demo-srv" />
+          </div>
+          <div class="field">
+            <label>Scopes (空格分隔)</label>
+            <input id="scopes" value="openid profile" />
+          </div>
+          <div class="row">
+            <button onclick="startOauth()">Start OAuth</button>
+            <button onclick="simulateCallback()" class="secondary">Simulate Callback</button>
+            <button onclick="invokeDemo()" class="secondary">Invoke /invoke</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>会话列表</h3>
+          <div style="margin-bottom:8px">
+            <button onclick="listSessions()">Refresh</button>
+          </div>
+          <div id="sessionsArea" class="log">No sessions yet</div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <h3>会话详情 / 操作</h3>
+          <div class="field">
+            <label>Session ID</label>
+            <input id="sessionFetchId" placeholder="session id for detail/revoke" />
+          </div>
+          <div class="row actions">
+            <button onclick="getSession()">Get Session</button>
+            <button onclick="revokeSession()" style="background:#e53935">Revoke</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>响应 / 日志</h3>
+          <div id="out" class="log">ready</div>
+        </div>
+      </div>
     </div>
-    <div style="margin-top:8px">
-      <button onclick="getSession()">Get Session</button>
-      <button onclick="revokeSession()" style="background:#e53935">Revoke Session</button>
-    </div>
-  </div>
-
-  <div class="box">
-    <h3>通用</h3>
-    <button onclick="health()">Health</button>
-  </div>
-
-  <div class="box">
-    <h3>响应 / 日志</h3>
-    <pre id="out">ready</pre>
   </div>
 
   <script src="main.js"></script>
