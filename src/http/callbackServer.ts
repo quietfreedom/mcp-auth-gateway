@@ -62,6 +62,17 @@ export function startCallbackServer(opts?: { port?: number }) {
           return;
         }
 
+        // Demo fallback: if issuer looks like a demo placeholder, skip discovery and openid-client
+        if (typeof issuer === 'string' && issuer.includes('issuer.example')) {
+          const codeVerifier = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          const state = 'demo-' + Math.random().toString(36).slice(2);
+          pending.set(state, { codeVerifier, serverId, clientConfig: { issuerUrl: issuer, clientId, redirectUri } });
+          const url = `${redirectUri}?state=${encodeURIComponent(state)}&code=demo-code`;
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ url, state }));
+          return;
+        }
+
         const cfg: OauthClientConfig = { issuerUrl: issuer, clientId, clientSecret: undefined, redirectUri };
         const oc = new OauthClient(cfg);
         await oc.init();
@@ -91,6 +102,22 @@ export function startCallbackServer(opts?: { port?: number }) {
         if (!p) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'unknown state' }));
+          return;
+        }
+
+        // Demo fallback: if the stored clientConfig issuer is a demo placeholder, skip real callback handling
+        const clientCfg = p.clientConfig as OauthClientConfig | undefined;
+        if (clientCfg && clientCfg.issuerUrl && clientCfg.issuerUrl.includes('issuer.example')) {
+          const tokenSet = {
+            access_token: 'demo-access-token-' + Math.random().toString(36).slice(2),
+            token_type: 'Bearer',
+            expires_in: 3600,
+            scope: (clientCfg as any).scopes || 'openid profile'
+          };
+          saveToken(p.serverId, tokenSet as any);
+          pending.delete(state);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, tokenSet }));
           return;
         }
 
