@@ -1,6 +1,6 @@
 // src/manifest/cache.ts
 
-import type { ToolManifest } from "./types";
+import type { ToolManifest } from "./type";
 
 interface CacheEntry {
   manifest: ToolManifest;

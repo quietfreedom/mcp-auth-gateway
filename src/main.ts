@@ -5,6 +5,7 @@
 import { startCallbackServer } from './http/callbackServer';
 import { startGatewayMcpServer } from './server/gatewayMcpServer';
 import { McpClientManager } from './client/mcpClientManager';
+import { saveToken } from './auth/tokenStore';
 
 export async function main() {
   // 启动 demo callback server（可选）

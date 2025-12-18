@@ -115,6 +115,19 @@ export function startCallbackServer(opts?: { port?: number }) {
             scope: (clientCfg as any).scopes || 'openid profile'
           };
           saveToken(p.serverId, tokenSet as any);
+          // notify gateway admin API so gateway can pick up the token
+          (async () => {
+            try {
+              const adminUrl = new URL('http://localhost:4001/admin/token');
+              await fetch(adminUrl.toString(), {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ serverId: p.serverId, token: tokenSet, ttlSeconds: tokenSet.expires_in })
+              });
+            } catch (e) {
+              console.warn('Failed to notify gateway admin for demo token:', (e as any)?.message ?? e);
+            }
+          })();
           pending.delete(state);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: true, tokenSet }));
@@ -133,6 +146,20 @@ export function startCallbackServer(opts?: { port?: number }) {
 
         // Save full tokenSet under serverId
         saveToken(p.serverId, tokenSet);
+
+        // Notify gateway admin API so gateway can pick up the saved token
+        (async () => {
+          try {
+            const adminUrl = new URL('http://localhost:4001/admin/token');
+            await fetch(adminUrl.toString(), {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ serverId: p.serverId, token: tokenSet, ttlSeconds: tokenSet.expires_in })
+            });
+          } catch (e) {
+            console.warn('Failed to notify gateway admin for token:', (e as any)?.message ?? e);
+          }
+        })();
 
         pending.delete(state);
 
